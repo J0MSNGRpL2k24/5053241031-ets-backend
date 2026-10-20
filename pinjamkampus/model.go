@@ -16,4 +16,18 @@ type Peminjaman struct {
 	SlotSelesai  int    `json:"slot_selesai"`
 	Jumlah       int    `json:"jumlah"`
 	Status       string `json:"status"`
+} 
+
+
+type RingkasanSumberDaya struct {
+	SumberDayaID     int    `json:"sumber_daya_id"`
+	Nama             string `json:"nama"`
+	JumlahPeminjaman int    `json:"jumlah_peminjaman"`
+}
+
+type RingkasanResponse struct {
+	Tanggal          string                `json:"tanggal"`
+	JumlahPeminjaman int                   `json:"jumlah_peminjaman"`
+	TotalUnitSlot    int                   `json:"total_unit_slot"`
+	PerSumberDaya    []RingkasanSumberDaya `json:"per_sumber_daya"`
 }

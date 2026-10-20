@@ -23,6 +23,8 @@ func NewHandler() http.Handler {
 
 
 	mux.HandleFunc("GET /kuota", handleGetKuota(store)) //endpoint untuk melihat sisa kuota peminjaman per hari
+	// Endpoint Change Request
+	mux.HandleFunc("GET /ringkasan", handleGetRingkasan(store))
 
 	return mux
 }

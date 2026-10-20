@@ -287,5 +287,69 @@ func handleGetKuota(store *MemoryStore) http.HandlerFunc {
 
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]int{"sisa_kuota": sisa})
+	} 
+
+
+
+
+	// --- CHANGE REQUEST A: Dashboard Ringkasan ---
+func handleGetRingkasan(store *MemoryStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		tanggal := r.URL.Query().Get("tanggal")
+
+		
+		if tanggal == "" {
+			sendError(w, http.StatusBadRequest, "Tanggal wajib diisi")
+			return
+		}
+		if _, err := time.Parse("2006-01-02", tanggal); err != nil {
+			sendError(w, http.StatusBadRequest, "Format tanggal tidak valid, harus YYYY-MM-DD")
+			return
+		}
+
+		store.mu.Lock()
+		defer store.mu.Unlock()
+
+		totalPeminjaman := 0
+		totalUnitSlot := 0
+		peminjamanPerSD := make(map[int]int)
+
+		
+		for _, p := range store.Peminjaman {
+			
+			if p.Tanggal == tanggal && p.Status == "aktif" {
+				totalPeminjaman++
+				banyakSlot := p.SlotSelesai - p.SlotMulai + 1
+				totalUnitSlot += (p.Jumlah * banyakSlot)
+				peminjamanPerSD[p.SumberDayaID]++
+			}
+		}
+
+		
+		var perSD []RingkasanSumberDaya
+		for _, sd := range store.SumberDaya {
+			perSD = append(perSD, RingkasanSumberDaya{
+				SumberDayaID:     sd.ID,
+				Nama:             sd.Nama,
+				JumlahPeminjaman: peminjamanPerSD[sd.ID], 
+		}
+
+		
+		sort.Slice(perSD, func(i, j int) bool {
+			return perSD[i].SumberDayaID < perSD[j].SumberDayaID
+		})
+
+		
+		resp := RingkasanResponse{
+			Tanggal:          tanggal,
+			JumlahPeminjaman: totalPeminjaman,
+			TotalUnitSlot:    totalUnitSlot,
+			PerSumberDaya:    perSD,
+		}
+
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(resp)
 	}
+}
 }
