@@ -17,9 +17,12 @@ func NewHandler() http.Handler {
 	mux.HandleFunc("GET /peminjaman", handleGetPeminjaman(store))
 	mux.HandleFunc("GET /peminjaman/{id}", handleGetPeminjamanByID(store))
 	
-	// KOREKSI: Sesuai kontrak ETS, gunakan PUT /peminjaman/{id}
+	
 	mux.HandleFunc("PUT /peminjaman/{id}", handleUpdatePeminjaman(store))
 	mux.HandleFunc("DELETE /peminjaman/{id}", handleDeletePeminjaman(store))
+
+
+	mux.HandleFunc("GET /kuota", handleGetKuota(store)) //endpoint untuk melihat sisa kuota peminjaman per hari
 
 	return mux
 }
